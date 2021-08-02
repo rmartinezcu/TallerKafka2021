@@ -1,0 +1,125 @@
+Inicio
+
+1.	Levantar Zookeeper
+
+
+# zookeeper-server-start.sh config/zookeeper.properties
+
+
+2.	Levantar Kafka 
+# kafka-server-start.sh config/server.properties
+
+
+3.	Topicos
+
+Crear Topic
+
+# kafka-topics.sh --zookeeper 127.0.0.1:2181 --topic first_topic --create --partitions 3 --replication-factor 1
+
+Listar
+
+# kafka-topics.sh --zookeeper 127.0.0.1:2181 --list
+
+
+Describir
+
+
+# kafka-topics.sh --zookeeper 127.0.0.1:2181 --topic first_topic --describe
+
+
+Productor
+
+
+# kafka-console-producer.sh --broker-list 127.0.0.1:9092 --topic first_topic
+
+
+Agregar configuración a productor
+
+#kafka-console-producer.sh --broker-list 127.0.0.1:9092 --topic first_topic --producer-property acks=all
+
+NOTA:
+Cuando creamos un productor, y en la parte del comando consignamos un topic no existente, este se creara por defecto, con los valores por defecto definido en los archivos de configuracion.
+
+CONSUMER
+
+Solamente tomara los valores a partir de donde se ha iniciado el productor:
+
+# kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 --topic first_topic --from-beginning
+
+Tomara los valores a partir del inicio 
+# kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 --topic
+first_topic
+
+
+GRUPOS de CONSUMIDORES
+Creamos grupos de consumidores, donde llamamos un nombre al grupo, y este recibe los mensajes de manera balanceada.
+
+# kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 --topic
+first_topic --group my-first-application
+
+Para este ejercicio creamos un productor y 3 consumidores:
+
+
+KAFKA-CONSUMER-GROUPS
+
+Listado de los grupos consumidores:
+
+# kafka-consumer-groups.sh --bootstrap-server 127.0.0.1:9092  --list
+
+
+Describir los grupos consumidores:
+
+
+# kafka-consumer-groups.sh --bootstrap-server 127.0.0.1:9092  --describe --group my_second-application
+
+
+
+Podemos ver que:
+-	El grupo second application tiene 3 particiones.
+-	El Current-Offset:
+de la 1era partición es 22 y es similar a LOG-END-OFFSET
+de la 2da particion es 30 y el LOG-END-OFFSET es igual a 31,esto quiere decir que le hace falta llegar un elemento
+de la 3ra partición es 21 y es similar a LOG-END-OFFSET es igual a 22, es que le falta llegar un mensaje.
+Hay un LAG de 2 elementos, en las particiones 2 y 3.
+
+ 
+Luego de que pasen, se normaliza todos los valores:
+
+Verificamos el otro grupo
+ 
+Tienen pendiente el consumo:
+ 
+
+Ya pasaron:
+ 
+
+Si dejamos a un consumidor activo:
+
+
+# kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 --topic first_topic --group my_first_application
+
+Si hacemos una descripción del grupo podemos ver el HOST la IP y el cliente
+
+ 
+Resetear los OFFSET
+
+Verificamos la posición del Offset, al inicio, se encuentra en la posicion 133
+
+ # kafka-consumer-groups.sh --bootstrap-server 127.0.0.1:9092 --group grupo1 --reset-offsets --to-earliest --execute --topic topic_riesgos
+
+
+Ahora ejecutamos la visualización del grupo de consumidor:
+
+# kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 --topic topic_riesgos --group grupo1
+
+
+Visualizamos que el OFFSET lo hemos colocado al inicio
+
+# kafka-consumer-groups.sh --bootstrap-server 127.0.0.1:9092 --group grupo1 --reset-offsets --shift-by 2  --execute --topic topic_riesgos
+
+ 
+#kafka-consumer-groups.sh --bootstrap-server 127.0.0.1:9092 --group grupo1 --reset-offsets --shift-by -2  --execute --topic topic_riesgos
+
+Verificamos que tenemos el OFFSET en 129
+ 
+# kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 --topic topic_riesgos --group grupo1
